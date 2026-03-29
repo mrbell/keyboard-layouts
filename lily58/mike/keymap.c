@@ -21,7 +21,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_LOWER] = LAYOUT(
         KC_F1,    KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,                     KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,
-        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______
+,
         KC_CAPS,  _______, _______, _______, _______, _______,                    KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, _______, _______,
         _______,  _______, _______, _______, _______, _______, _______,  _______,  _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______
@@ -47,48 +48,3 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 layer_state_t layer_state_set_user(layer_state_t state) {
     return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
 }
-
-#ifdef OLED_ENABLE
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    if (!is_keyboard_master()) {
-        return OLED_ROTATION_180;
-    }
-    return rotation;
-}
-
-static void render_layer_state(void) {
-    oled_write_ln_P(PSTR("Lily58"), false);
-    switch (get_highest_layer(layer_state)) {
-        case _BASE:
-            oled_write_ln_P(PSTR("BASE"), false);
-            break;
-        case _LOWER:
-            oled_write_ln_P(PSTR("LOWER"), false);
-            break;
-        case _RAISE:
-            oled_write_ln_P(PSTR("RAISE"), false);
-            break;
-        case _ADJUST:
-            oled_write_ln_P(PSTR("ADJUST"), false);
-            break;
-        default:
-            oled_write_ln_P(PSTR("UNDEF"), false);
-            break;
-    }
-    oled_write_ln_P(PSTR("Z/ = Ctrl"), false);
-}
-
-static void render_logo(void) {
-    oled_write_ln_P(PSTR("Lily58"), false);
-    oled_write_ln_P(PSTR("split"), false);
-}
-
-bool oled_task_user(void) {
-    if (is_keyboard_master()) {
-        render_layer_state();
-    } else {
-        render_logo();
-    }
-    return false;
-}
-#endif
