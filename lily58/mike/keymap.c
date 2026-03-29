@@ -1,0 +1,94 @@
+#include QMK_KEYBOARD_H
+
+#define Z_HOLD_MOD     MT(MOD_LCTL, KC_Z)
+#define SLSH_HOLD_MOD  MT(MOD_RCTL, KC_SLSH)
+
+enum layer_number {
+    _BASE = 0,
+    _LOWER,
+    _RAISE,
+    _ADJUST,
+};
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    [_BASE] = LAYOUT(
+        KC_GRV,   KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_EQL,
+        KC_TAB,   KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,
+        KC_ESC,   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
+        KC_LSFT,  Z_HOLD_MOD, KC_X, KC_C,    KC_V,    KC_B, KC_LBRC,   KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  SLSH_HOLD_MOD, KC_RSFT,
+                                 KC_LALT, KC_DEL, MO(_RAISE), KC_SPC, KC_ENT, MO(_LOWER), KC_BSPC, KC_LGUI
+    ),
+
+    [_LOWER] = LAYOUT(
+        KC_F1,    KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,                     KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        KC_CAPS,  _______, _______, _______, _______, _______,                    KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, _______, _______,
+        _______,  _______, _______, _______, _______, _______, _______,  _______,  _______, _______, _______, _______, _______, _______,
+                                 _______, _______, _______, _______, _______, _______, _______, _______
+    ),
+
+    [_RAISE] = LAYOUT(
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______, _______,  _______,  _______, _______, _______, _______, KC_BSLS, KC_PIPE,
+                                 _______, _______, _______, _______, _______, _______, _______, _______
+    ),
+
+    [_ADJUST] = LAYOUT(
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______,                    _______, _______, _______, _______, _______, _______,
+        _______,  _______, _______, _______, _______, _______,                    KC_MPRV, KC_VOLD, KC_VOLU, KC_MNXT, KC_MPLY, _______,
+        _______,  _______, _______, _______, _______, _______, _______,  _______,  _______, _______, _______, _______, _______, _______,
+                                 _______, _______, _______, _______, _______, _______, _______, _______
+    )
+};
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+}
+
+#ifdef OLED_ENABLE
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    if (!is_keyboard_master()) {
+        return OLED_ROTATION_180;
+    }
+    return rotation;
+}
+
+static void render_layer_state(void) {
+    oled_write_ln_P(PSTR("Lily58"), false);
+    switch (get_highest_layer(layer_state)) {
+        case _BASE:
+            oled_write_ln_P(PSTR("BASE"), false);
+            break;
+        case _LOWER:
+            oled_write_ln_P(PSTR("LOWER"), false);
+            break;
+        case _RAISE:
+            oled_write_ln_P(PSTR("RAISE"), false);
+            break;
+        case _ADJUST:
+            oled_write_ln_P(PSTR("ADJUST"), false);
+            break;
+        default:
+            oled_write_ln_P(PSTR("UNDEF"), false);
+            break;
+    }
+    oled_write_ln_P(PSTR("Z/ = Ctrl"), false);
+}
+
+static void render_logo(void) {
+    oled_write_ln_P(PSTR("Lily58"), false);
+    oled_write_ln_P(PSTR("split"), false);
+}
+
+bool oled_task_user(void) {
+    if (is_keyboard_master()) {
+        render_layer_state();
+    } else {
+        render_logo();
+    }
+    return false;
+}
+#endif
